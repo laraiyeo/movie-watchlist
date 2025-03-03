@@ -26,4 +26,9 @@ app.post('/add', (req, res) => {
     res.redirect('/');
 });
 
+app.post('/delete/:id', (req, res) => {
+    movies = movies.filter(movie => movie.id !== parseInt(req.params.id));
+    res.redirect('/');
+});
+
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

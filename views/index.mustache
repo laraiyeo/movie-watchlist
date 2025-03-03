@@ -18,7 +18,12 @@
 
     <ul>
         {{#movies}}
-        <li>{{title}} ({{year}}) - {{genre}} - Rating: {{rating}}</li>
+        <li>
+            {{title}} ({{year}}) - {{genre}} - Rating: {{rating}}
+            <form action="/delete/{{id}}" method="POST">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
         {{/movies}}
     </ul>
 </body>
