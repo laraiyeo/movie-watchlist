@@ -31,4 +31,10 @@ app.post('/delete/:id', (req, res) => {
     res.redirect('/');
 });
 
+app.post('/update/:id', (req, res) => {
+    const movie = movies.find(m => m.id === parseInt(req.params.id));
+    if (movie) movie.watched = !movie.watched;
+    res.redirect('/');
+});
+
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

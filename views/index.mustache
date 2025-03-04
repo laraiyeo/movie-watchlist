@@ -20,6 +20,9 @@
         {{#movies}}
         <li>
             {{title}} ({{year}}) - {{genre}} - Rating: {{rating}}
+            <form action="/update/{{id}}" method="POST">
+                <button type="submit">Toggle Watched</button>
+            </form>
             <form action="/delete/{{id}}" method="POST">
                 <button type="submit">Delete</button>
             </form>
