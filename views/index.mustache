@@ -18,14 +18,8 @@
 
     <ul>
         {{#movies}}
-        <li>
+        <li style="background-color: {{#watched}}lightgrey{{/watched}}; font-weight: {{#watched}}bold{{/watched}};">
             {{title}} ({{year}}) - {{genre}} - Rating: {{rating}}
-            <form action="/update/{{id}}" method="POST">
-                <button type="submit">Toggle Watched</button>
-            </form>
-            <form action="/delete/{{id}}" method="POST">
-                <button type="submit">Delete</button>
-            </form>
         </li>
         {{/movies}}
     </ul>
