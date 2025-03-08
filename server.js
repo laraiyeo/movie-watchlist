@@ -16,7 +16,19 @@ app.use(express.static('public'));
 let movies = [];
 
 app.get('/', (req, res) => {
-    res.render('index', { movies });
+    let filteredMovies = [...movies];
+
+    // Filtering by Genre
+    if (req.query.genre && req.query.genre !== "All") {
+        filteredMovies = filteredMovies.filter(movie => movie.genre === req.query.genre);
+    }
+
+    // Sorting by Rating
+    if (req.query.sort === "rating") {
+        filteredMovies.sort((a, b) => b.rating - a.rating);
+    }
+
+    res.render('index', { movies: filteredMovies, selectedGenre: req.query.genre || "All" });
 });
 
 app.post('/add', (req, res) => {
