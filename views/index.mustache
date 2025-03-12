@@ -4,49 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Watchlist</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .watched {
+            background-color: #e0e0e0 !important;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h1>Movie Watchlist</h1>
+    <div class="container mt-4">
+        <h1 class="text-center">Movie Watchlist</h1>
 
-    <form action="/add" method="POST">
-        <input type="text" name="title" placeholder="Movie Title" required>
-        <input type="text" name="genre" placeholder="Genre">
-        <input type="number" name="year" placeholder="Year" min="1900">
-        <input type="number" name="rating" placeholder="Rating" min="0" max="10" step="0.1">
-        <button type="submit">Add Movie</button>
-    </form>
+        <!-- Add Movie Form -->
+        <form action="/add" method="POST" class="mb-3 d-flex gap-2">
+            <input type="text" name="title" placeholder="Movie Title" class="form-control" required>
+            <input type="text" name="genre" placeholder="Genre" class="form-control">
+            <input type="number" name="year" placeholder="Year" min="1900" class="form-control">
+            <input type="number" name="rating" placeholder="Rating" min="0" max="10" step="0.1" class="form-control">
+            <button type="submit" class="btn btn-primary">Add Movie</button>
+        </form>
 
-    <form method="GET" action="/">
-        <label for="genre">Filter by Genre:</label>
-        <select name="genre" id="genre">
-            <option value="All" {{#equal selectedGenre "All"}}selected{{/equal}}>All</option>
-            <option value="Action" {{#equal selectedGenre "Action"}}selected{{/equal}}>Action</option>
-            <option value="Comedy" {{#equal selectedGenre "Comedy"}}selected{{/equal}}>Comedy</option>
-            <option value="Drama" {{#equal selectedGenre "Drama"}}selected{{/equal}}>Drama</option>
-        </select>
+        <!-- Filter and Sort -->
+        <form method="GET" class="mb-3">
+            <label for="genreFilter">Filter by Genre:</label>
+            <select name="genre" id="genreFilter" onchange="this.form.submit()" class="form-select d-inline-block w-auto">
+                <option value="All" {{#selectedGenre}}selected{{/selectedGenre}}>All Genres</option>
+                {{#genres}}
+                <option value="{{.}}" {{#selected}}selected{{/selected}}>{{.}}</option>
+                {{/genres}}
+            </select>
+            <button type="submit" name="sort" value="rating" class="btn btn-secondary">Sort by Rating</button>
+            <a href="/" class="btn btn-danger">Clear</a>
+        </form>
 
-        <label for="sort">Sort by:</label>
-        <select name="sort">
-            <option value="">None</option>
-            <option value="rating">Rating</option>
-        </select>
+        <!-- Movie List -->
+        <ul class="list-group">
+            {{#movies}}
+            <li class="list-group-item d-flex justify-content-between align-items-center movie-item {{#watched}}watched{{/watched}}" data-id="{{id}}">
+                <div>
+                    <strong>{{title}}</strong> ({{year}}) - <em>{{genre}}</em> - {{rating}} ⭐
+                </div>
+                <div>
+                    <button class="btn btn-warning btn-sm toggle-watched">Toggle Watched</button>
+                    <form action="/delete/{{id}}" method="POST" class="d-inline">
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                    <button class="btn btn-info btn-sm edit-btn" data-id="{{id}}" data-title="{{title}}" data-genre="{{genre}}" data-year="{{year}}" data-rating="{{rating}}">Edit</button>
+                </div>
+            </li>
+            {{/movies}}
+        </ul>
+    </div>
 
-        <button type="submit">Apply</button>
-        <a href="/" style="background-color: red; color: white; padding: 5px; text-decoration: none;">Clear</a>
-    </form>
+    <!-- JavaScript for Editing & Toggle Watched -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Toggle Watched Feature
+            document.querySelectorAll(".toggle-watched").forEach(button => {
+                button.addEventListener("click", function () {
+                    const movieItem = this.closest(".movie-item");
+                    const movieId = movieItem.dataset.id;
 
-    <ul>
-        {{#movies}}
-        <li style="background-color: {{#watched}}lightgrey{{/watched}}; font-weight: {{#watched}}bold{{/watched}};">
-            {{title}} ({{year}}) - {{genre}} - Rating: {{rating}}
-            <form action="/update/{{id}}" method="POST">
-                <button type="submit">Toggle Watched</button>
-            </form>
-            <form action="/delete/{{id}}" method="POST">
-                <button type="submit">Delete</button>
-            </form>
-        </li>
-        {{/movies}}
-    </ul>
+                    fetch(`/update/${movieId}`, { method: "POST" })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                movieItem.classList.toggle("watched");
+                            }
+                        });
+                });
+            });
+
+            // Edit Movie Feature
+            document.querySelectorAll(".edit-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const id = this.dataset.id;
+                    const title = this.dataset.title;
+                    const genre = this.dataset.genre;
+                    const year = this.dataset.year;
+                    const rating = this.dataset.rating;
+
+                    const editForm = `
+                        <form action="/edit/${id}" method="POST" class="mt-2">
+                            <input type="text" name="title" value="${title}" class="form-control" required>
+                            <input type="text" name="genre" value="${genre}" class="form-control">
+                            <input type="number" name="year" value="${year}" min="1900" class="form-control">
+                            <input type="number" name="rating" value="${rating}" min="0" max="10" step="0.1" class="form-control">
+                            <button type="submit" class="btn btn-success mt-2">Save</button>
+                        </form>
+                    `;
+                    this.parentElement.innerHTML = editForm;
+                });
+            });
+        });
+    </script>
 </body>
 </html>
